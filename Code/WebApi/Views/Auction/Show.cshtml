@@ -1,0 +1,23 @@
+﻿@model MadBidFetcher.Model.AuctionModel
+
+@{
+    ViewBag.Title = "Auction Display";
+    var auctionTime = Model.Auction.BidTime/2*1000;
+}
+@if(Model.AutoUpdate && auctionTime>0)
+{
+	<script type="text/javascript">
+	    window.setInterval(function() { window.location.reload(); }, @auctionTime);
+	</script>
+}
+<h2>Auction Display - @((int)(DateTime.Now-Model.Auction.LastDeltaReset).TotalSeconds) - @Model.Players.Count(r => r.Delta > 0)</h2>
+<table width="100%">
+    @foreach (var p in Model.Players)
+    {
+        <tr>
+            <td>@p.Name</td>
+            <td>@p.Count</td>
+            <td>@p.Delta</td>
+        </tr>
+    }
+</table>

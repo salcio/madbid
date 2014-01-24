@@ -1,0 +1,37 @@
+﻿@using MadBidFetcher.Extensions
+@model List<MadBidFetcher.Model.Auction>
+
+@{
+    ViewBag.Title = "Auctions";
+}
+<script type="text/javascript">
+	window.setInterval(function() { window.location.reload(); }, 5000);
+</script>
+
+<table width="100%">
+    <thead>
+        <tr>
+            <td>Links</td>
+            <td>Id</td>
+            <td>Price</td>
+            <td>Status</td>
+            <td>Bid time</td>
+            <td>Players Count</td>
+            <td>Last Bid Date</td>
+            <td>Last Delta Reset</td>
+        </tr>
+    </thead>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@Html.ActionLink("Show","Show", new {id=p.Id}) @Html.ActionLink("Latest","Latest", new {id=p.Id}) @Html.ActionLink("Reset","Reset", new {id=p.Id})</td>
+            <td>@p.Id</td>
+            <td>@p.Price</td>
+            <td>@p.Status.Description()</td>
+            <td>@p.BidTime</td>
+            <td>@p.Players.Count</td>
+            <td>@p.LastBidDate</td>
+            <td>@p.LastDeltaReset</td>
+        </tr>
+    }
+</table>

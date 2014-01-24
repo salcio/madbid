@@ -1,0 +1,11 @@
+*.user
+*.suo
+_ReSharper*/
+obj/
+bin/
+Obj/
+Bin/
+Debug/
+pkgobj/
+pkg/
+FakesAssemblies/
