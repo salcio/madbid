@@ -10,15 +10,12 @@ namespace MadBidFetcher.Model
 	{
 		public int Id { get; set; }
 		public Dictionary<string, Player> Players { get; set; }
-
-		public DateTime LastDeltaReset { get; set; }
 		public DateTime LastBidDate { get; set; }
-
 		public int BidTime { get; set; }
-
 		public AuctionStatus Status { get; set; }
 
 		public float Price { get; set; }
+		public DateTime LastDeltaReset { get; set; }
 
 		public Auction()
 		{

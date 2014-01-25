@@ -12,7 +12,8 @@ namespace ConsoleRunner
 		static void Main(string[] args)
 		{
 			var updater = Updater.Initialize(@"c:\data.dat");
-				updater.UpdateLoop(100);
+				//updater.UpdateLoop(100);
+			updater.RefreshAll();
 		}
 	}
 }

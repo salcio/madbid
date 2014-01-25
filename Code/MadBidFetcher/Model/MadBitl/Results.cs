@@ -1,7 +1,8 @@
 ﻿namespace MadBidFetcher.Model.MadBitl
 {
-	public class Results
+	public class Results<T>
 	{
-		public Response response;
-	}
+		public T Response;
+	}	
+	
 }

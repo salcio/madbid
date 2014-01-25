@@ -1,6 +1,6 @@
 namespace MadBidFetcher.Model.MadBitl
 {
-	public class Response
+	public class UpdateResponse
 	{
 		public AuctionUpdate[] items;
 	}

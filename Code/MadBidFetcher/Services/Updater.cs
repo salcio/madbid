@@ -73,6 +73,20 @@ namespace MadBidFetcher.Services
 			Auctions.Values.ToList().ForEach(a => a.ResetDeltas());
 		}
 
+		public virtual void RefreshAll()
+		{
+			var serializer = new JavaScriptSerializer();
+			using (var client = new WebClient())
+			{
+				client.Headers.Add(HttpRequestHeader.Accept, "/*/");
+				client.Headers.Add(HttpRequestHeader.UserAgent,
+				                   "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+				var r = serializer
+					.Deserialize<Results<RefreshResponse>>(client.DownloadString("http://uk.madbid.com/json/site/load/current/refresh/"))
+					.Response;
+			}
+		}
+
 		public virtual void Update()
 		{
 			var serializer = new JavaScriptSerializer();
@@ -82,8 +96,8 @@ namespace MadBidFetcher.Services
 				client.Headers.Add(HttpRequestHeader.UserAgent,
 								   "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
 				serializer
-					.Deserialize<Results>(client.DownloadString("http://uk.madbid.com/json/auction/update/"))
-					.response
+					.Deserialize<Results<UpdateResponse>>(client.DownloadString("http://uk.madbid.com/json/auction/update/"))
+					.Response
 					.items
 					.Where(a => a.highest_bid > 0.001)
 					.ToList()
