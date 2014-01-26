@@ -15,7 +15,7 @@ namespace WebApi.Controllers
 			return View(Updater.Instance.Auctions.Values
 				.OrderByDescending(a => a.Status == AuctionStatus.Running)
 				.ThenByDescending(a => a.Status)
-				.ThenBy(a => a.BidTime)
+				.ThenBy(a => a.BidTimeOut)
 				.ToList());
 		}
 

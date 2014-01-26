@@ -35,7 +35,7 @@ namespace MadBidFetcher.Services
 						         var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction {Id = a.auction_id});
 						         var player = auction.Players.GetOrAdd(a.highest_bidder, () => new Player {Name = a.highest_bidder});
 						         player.Count++;
-						         player.Delta++;
+						         //player.Delta++;
 					         });
 
 		}

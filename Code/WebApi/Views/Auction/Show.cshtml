@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Title = "Auction Display";
-    var auctionTime = Model.Auction.BidTime/2*1000;
+    var auctionTime = Model.Auction.BidTimeOut/2*1000;
 }
 @if(Model.AutoUpdate && auctionTime>0)
 {
