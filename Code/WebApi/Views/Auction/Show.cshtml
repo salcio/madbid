@@ -24,13 +24,13 @@
                 <div class="players">
                     <p>Last @p.Key bids (@p.Value.Count)</p>
                     <table>
-                        @foreach (var player in p.Value.OrderByDescending(b=>b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
+                        @foreach (var player in p.Value.OrderByDescending(b => b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
                         {
                             <tr>
                                 <td>
                                     <b>@player.Player.Name</b>
                                 </td>
-                                <td>
+                                <td class="bids">
                                     @player.Bids.Count
                                 </td>
                                 <td class="bids">(@(string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray())))
@@ -40,6 +40,26 @@
                     </table>
                 </div>
             }
-       </td>
+            <div class="allPlayers">
+                <table>
+                    @foreach (var p in Model.Auction.Players.OrderByDescending(pl=>pl.Value.Bids.Count))
+                    {
+                        var last = p.Value.Bids.LastOrDefault();
+                        <tr>
+                            <td>@p.Key</td>
+                            <td>@p.Value.Bids.Count</td>
+                            @if (last != null)
+                            {
+                                <td class="bids">@last.Value.ToString("C") (@last.Time)</td>
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+        </td>
     </tr>
 </table>

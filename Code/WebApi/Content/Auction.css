@@ -43,6 +43,15 @@ td {
         padding: 5px;
         width: 385px;
     }
+    .auctionDetails .allPlayers {
+        padding: 5px;
+        background: white;
+        width: 1183px;
+        margin-top: 5px;
+    }
+    .auctionDetails .allPlayers table {
+        width: 100%;
+    }
     .players table {
         width: 100%;
     }

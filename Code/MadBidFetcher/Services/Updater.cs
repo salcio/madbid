@@ -112,25 +112,21 @@ namespace MadBidFetcher.Services
 									 auction.DateOpens = a.auction_data.date_opens;
 									 auction.StartTime = a.auction_data.availability.time_start;
 									 auction.EndTime = a.auction_data.availability.time_end;
-									 var bidsToCheck = auction.Bids.Count > 100
-														   ? auction.Bids.Skip(auction.Bids.Count - 20).Take(20).ToList()
-														   : auction.Bids;
 									 a.auction_data.bidding_history
 										 .OrderBy(b => b.bid_value)
 										 .ToList()
 										 .ForEach(b =>
 													  {
 														  var player = auction.Players.GetOrAdd(b.user_name, () => new Player { Name = b.user_name });
-														  if (bidsToCheck.Any(bid => Math.Abs(bid.Value - b.bid_value) < 0.001))
-															  return;
 														  var time = a.auction_data.last_bid.Date != null
 																	 && Math.Abs(b.bid_value - a.auction_data.last_bid.highest_bid) < 0.001
 																	 && b.user_name == a.auction_data.last_bid.highest_bidder
 																		 ? a.auction_data.last_bid.Date
 																		 : (DateTime?)null;
-														  auction.Bids.Add(new Bid { Auction = auction, Player = player, Value = b.bid_value, Time = time });
+														  var newbid = new Bid { Auction = auction, Player = player, Value = b.bid_value, Time = time };
+														  InsertBid(auction.Bids, b.bid_value, newbid);
+														  InsertBid(player.Bids, b.bid_value, newbid);
 													  });
-									 auction.Bids = auction.Bids.OrderBy(a1 => a1.Value).ToList();
 								 });
 			}
 		}
@@ -161,14 +157,31 @@ namespace MadBidFetcher.Services
 									 auction.Price = a.highest_bid;
 									 auction.ActivePlayers = null;
 									 var player = auction.Players.GetOrAdd(a.highest_bidder, () => new Player { Name = a.highest_bidder });
-									 auction.Bids = auction.Bids ?? new List<Bid>();
-									 var lastBid = auction.Bids.LastOrDefault();
-									 if (lastBid != null && lastBid.Value - a.highest_bid > 0.001)
-										 return;
-									 auction.Bids.Add(new Bid { Auction = auction, Player = player, Time = date, Value = a.highest_bid });
+									 var newBid = new Bid { Auction = auction, Player = player, Time = date, Value = a.highest_bid };
+									 InsertBid(auction.Bids, a.highest_bid, newBid);
+									 InsertBid(player.Bids, a.highest_bid, newBid);
 								 });
 			}
 
+		}
+
+		private static void InsertBid(List<Bid> bids, float bidValue, Bid newBid)
+		{
+			var index = bids.Count - 20;
+			if (bids.Count > 0)
+			{
+				for (index = index < 0 ? 0 : index; index < bids.Count; index++)
+				{
+					if (Math.Abs(bids[index].Value - bidValue) < 0.001)
+						return;
+					if (bids[index].Value - bidValue >= 0.01)
+						break;
+				}
+			}
+			if (index < bids.Count)
+				bids.Add(newBid);
+			else
+				bids.Insert(index, newBid);
 		}
 	}
 }

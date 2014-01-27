@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MadBidFetcher.Model
 {
@@ -6,12 +7,21 @@ namespace MadBidFetcher.Model
 	public class Player
 	{
 		public static int HighPlayerCount = 200;
+		private List<Bid> _bids;
 		public string Name { get; set; }
-		public int Count { get; set; }
+		public List<Bid> Bids
+		{
+			get { return _bids = _bids ?? new List<Bid>(); }
+			set { _bids = value; }
+		}
+
+		public Player()
+		{
+		}
 
 		public bool IsHighPlayer()
 		{
-			return Count > HighPlayerCount;
+			return Bids.Count > HighPlayerCount;
 		}
 
 		protected bool Equals(Player other)
@@ -24,7 +34,7 @@ namespace MadBidFetcher.Model
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			if (obj.GetType() != this.GetType()) return false;
-			return Equals((Player) obj);
+			return Equals((Player)obj);
 		}
 
 		public override int GetHashCode()

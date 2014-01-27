@@ -11,6 +11,7 @@ namespace MadBidFetcher.Model
 	{
 		public static int[] ActivaPlayersTimes = new int[] { 10, 20, 30 };
 		private Dictionary<int, List<PlayerBids>> _activePlayers;
+		private List<Bid> _bids;
 
 		public int Id { get; set; }
 		public DateTime? LastBidDate { get; set; }
@@ -27,7 +28,12 @@ namespace MadBidFetcher.Model
 		public DateTime? DateOpens { get; set; }
 
 		public Dictionary<string, Player> Players { get; set; }
-		public List<Bid> Bids { get; set; }
+		public List<Bid> Bids
+		{
+			get { return _bids = _bids ?? new List<Bid>(); }
+			set { _bids = value; }
+		}
+
 		public Dictionary<int, List<PlayerBids>> ActivePlayers
 		{
 			get

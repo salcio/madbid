@@ -15,10 +15,10 @@ namespace MadBidFetcher.Services
 			.Values
 			.OrderByDescending(g => g.IsHighPlayer())
 			//.ThenByDescending(g => g.Delta)
-			.ThenByDescending(g => g.Count)
+			.ThenByDescending(g => g.Bids.Count)
 			.ToList();
 
-			a(results.Where(c => c.Count >= skipCountLessThen));
+			a(results.Where(c => c.Bids.Count >= skipCountLessThen));
 
 			//a(string.Format("Deltas last reset : {0}", updater.Auctions[auctionId].LastDeltaReset));
 			//a(string.Format("Number of users with delta : {0}", results.Count(r => r.Delta > 0)));
