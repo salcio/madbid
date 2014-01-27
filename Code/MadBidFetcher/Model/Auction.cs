@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 using MadBidFetcher.Services;
 
 namespace MadBidFetcher.Model
@@ -23,6 +24,7 @@ namespace MadBidFetcher.Model
 		public float RetailPrice { get; set; }
 		public string EndTime { get; set; }
 		public string StartTime { get; set; }
+		public DateTime? DateOpens { get; set; }
 
 		public Dictionary<string, Player> Players { get; set; }
 		public List<Bid> Bids { get; set; }
@@ -43,6 +45,12 @@ namespace MadBidFetcher.Model
 																					.ToList());
 			}
 			set { _activePlayers = value; }
+		}
+
+		[XmlIgnore]
+		public bool CurrentUserAuction
+		{
+			get { return Players.ContainsKey(SessionStore.CurrentUser); }
 		}
 
 		public Auction()

@@ -14,29 +14,55 @@
                 <img src="@Model.Images[0]"/>
             </a>
         }
-		<p>
-			@Model.Status (@Model.StartTime-@Model.EndTime)
-		</p>
         <p>
-            Active players: 
-		@foreach (var p in Model.ActivePlayers)
-  {
-      if (first)
-      {
-          first = false;
-            <span><b>@p.Value.Count</b></span>
-      }
-      else
-      {
-            <span>(@p.Value.Count)</span>					
-      }
-  }
-            <br />
-            Bid time : @Model.BidTimeOut
-            <br />
-            Credit cost : @Model.CreditCost
-            <br />
-            Total players : @Model.Players.Count
+            @Model.Status @(Model.DateOpens.HasValue && Model.DateOpens > DateTime.Now ? Model.DateOpens.Value.ToString("dd MMM hh:mm") : string.Format("{0}-{1}", Model.StartTime, Model.EndTime))
         </p>
+        <table>
+            <tr>
+                <td>Active players</td>
+                <td>
+                    @foreach (var p in Model.ActivePlayers)
+                    {
+                        if (first)
+                        {
+                            first = false;
+                        <span><b>@p.Value.Count</b></span>
+                        }
+                        else
+                        {
+                        <span>(@p.Value.Count)</span>					
+                        }
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>Bid time 
+                </td>
+                <td>
+                    @Model.BidTimeOut
+                </td>
+            </tr>
+            <tr>
+                <td>Credit cost 
+                </td>
+                <td>
+                    @Model.CreditCost
+                </td>
+            </tr>
+            <tr>
+                <td>Total players 
+                </td>
+                <td>
+                    @Model.Players.Count
+                </td>
+            </tr>
+            <tr>
+                <td>Is Current user auction    
+                </td>
+                <td>
+                    @Model.CurrentUserAuction
+                </td>
+            </tr>
+        </table>
     </div>
 </div>

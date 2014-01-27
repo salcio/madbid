@@ -22,7 +22,7 @@
             @foreach (var p in Model.Auction.ActivePlayers)
             {
                 <div class="players">
-                    <p>Last @p.Key bids</p>
+                    <p>Last @p.Key bids (@p.Value.Count)</p>
                     <table>
                         @foreach (var player in p.Value.OrderByDescending(b=>b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
                         {

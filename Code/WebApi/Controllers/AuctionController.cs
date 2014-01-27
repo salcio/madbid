@@ -14,6 +14,7 @@ namespace WebApi.Controllers
 		{
 			return View(Updater.Instance.Auctions.Values
 				.OrderByDescending(a => a.Status == AuctionStatus.Running)
+				.ThenByDescending(a => a.CurrentUserAuction)
 				.ThenByDescending(a => a.Status)
 				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[0]].Count)
 				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[1]].Count)

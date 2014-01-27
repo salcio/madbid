@@ -109,6 +109,7 @@ namespace MadBidFetcher.Services
 									 auction.LastBidDate = a.auction_data.last_bid.Date;
 									 auction.Status = (AuctionStatus)(a.auction_data.state % 100);
 									 auction.ActivePlayers = null;
+									 auction.DateOpens = a.auction_data.date_opens;
 									 auction.StartTime = a.auction_data.availability.time_start;
 									 auction.EndTime = a.auction_data.availability.time_end;
 									 var bidsToCheck = auction.Bids.Count > 100
