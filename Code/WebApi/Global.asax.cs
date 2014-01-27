@@ -25,7 +25,7 @@ namespace WebApi
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-			var updater = Updater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\data.dat");
+			var updater = Updater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\");
 			updater.UpdateAsyncLoop(30);
 
 		}

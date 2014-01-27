@@ -1,0 +1,51 @@
+﻿html
+{
+    height: 100%;
+}
+
+body
+{
+    height: 100%;
+}
+td {
+    padding: 0px;
+}
+.auction {
+    background: white;
+}
+.auction .content {
+    padding: 0px;
+}
+
+.auctionCompact {
+    width: 320px;
+}
+.auctionDetails
+{
+    width: 100%;
+    height: 100%;
+}
+
+    .auctionDetails td
+    {
+        vertical-align: top;
+    }
+
+    .players p
+    {
+        text-align: center;
+    }
+
+    .players
+    {
+        display: inline-block;
+        background: white;
+        padding: 5px;
+        width: 385px;
+    }
+    .players table {
+        width: 100%;
+    }
+    td.bids {
+        padding-left: 10px;
+    }

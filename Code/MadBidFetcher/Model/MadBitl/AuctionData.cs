@@ -4,7 +4,7 @@ namespace MadBidFetcher.Model.MadBitl
 {
 	public class AuctionData
 	{
-		public object availability { get; set; }
+		public Availability availability { get; set; }
 		public AuctionBid[] bidding_history { get; set; }
 		public int credit_cost { get; set; }
 		public DateTime date_opens { get; set; }

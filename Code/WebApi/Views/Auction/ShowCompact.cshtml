@@ -1,0 +1,42 @@
+﻿@model MadBidFetcher.Model.Auction
+
+@{
+    ViewBag.Title = "Auction Display";
+    var first = true;
+}
+<div class="auction">
+    <div class="content">
+        <h5>@Html.ActionLink(string.IsNullOrEmpty(Model.Title) ? Model.Id.ToString() : Model.Title, "Show", new { id = Model.Id })</h5>
+        <p class="prices"><a href="http://uk.madbid.com/show/auction/@Model.Id/hehe">@Model.Price.ToString("C") - @Model.RetailPrice.ToString("C") </a></p>
+        @if (Model.Images != null)
+        {
+            <a href="@Url.Action("Show", new { id = Model.Id })">
+                <img src="@Model.Images[0]"/>
+            </a>
+        }
+		<p>
+			@Model.Status (@Model.StartTime-@Model.EndTime)
+		</p>
+        <p>
+            Active players: 
+		@foreach (var p in Model.ActivePlayers)
+  {
+      if (first)
+      {
+          first = false;
+            <span><b>@p.Value.Count</b></span>
+      }
+      else
+      {
+            <span>(@p.Value.Count)</span>					
+      }
+  }
+            <br />
+            Bid time : @Model.BidTimeOut
+            <br />
+            Credit cost : @Model.CreditCost
+            <br />
+            Total players : @Model.Players.Count
+        </p>
+    </div>
+</div>

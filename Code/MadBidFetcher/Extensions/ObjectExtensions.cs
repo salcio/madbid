@@ -88,19 +88,20 @@ namespace MadBidFetcher.Extensions
 		}
 		public static void SerializeObject<T>(this T objectToSerialize, string filename)
 		{
-			Stream stream = File.Open(filename, FileMode.Create);
-			var bFormatter = new BinaryFormatter();
-			bFormatter.Serialize(stream, objectToSerialize);
-			stream.Close();
+			using (var stream = File.Open(filename, FileMode.Create))
+			{
+				var bFormatter = new BinaryFormatter();
+				bFormatter.Serialize(stream, objectToSerialize);
+			}
 		}
 
 		public static T DeSerializeObject<T>(string filename)
 		{
-			Stream stream = File.Open(filename, FileMode.Open);
-			var bFormatter = new BinaryFormatter();
-			var objectToSerialize = (T)bFormatter.Deserialize(stream);
-			stream.Close();
-			return objectToSerialize;
+			using (Stream stream = File.Open(filename, FileMode.Open))
+			{
+				var bFormatter = new BinaryFormatter();
+				return (T)bFormatter.Deserialize(stream);
+			}
 		}
 	}
 }

@@ -15,23 +15,39 @@ namespace MadBidFetcher.Services
 	public class Updater
 	{
 		public Dictionary<int, Auction> Auctions { get; protected set; }
-		public string FilePath { get; set; }
+		public string FilesPath { get; set; }
 		public static Updater Instance { get; private set; }
 
-		public static Updater Initialize(string auctionsFile)
+		public static Updater Initialize(string auctionsPath)
 		{
-			return Instance = File.Exists(auctionsFile)
+			var files = Directory.Exists(auctionsPath)
+							? Directory.GetFiles(auctionsPath).OrderByDescending(f => new FileInfo(f).LastWriteTime).ToArray()
+							: new string[0];
+			return Instance = files.Length > 0
 					   ? new Updater
 							 {
-								 Auctions = ObjectExtensions.DeSerializeObject<Dictionary<int, Auction>>(auctionsFile),
-								 FilePath = auctionsFile
+								 Auctions = ObjectExtensions.DeSerializeObject<Dictionary<int, Auction>>(files[0]),
+								 FilesPath = auctionsPath
 							 }
-					   : new Updater { FilePath = auctionsFile };
+					   : new Updater { FilesPath = auctionsPath };
 		}
 
 		public void Save()
 		{
-			Auctions.SerializeObject(FilePath);
+			if (!Directory.Exists(FilesPath))
+			{
+				Directory.CreateDirectory(FilesPath);
+			}
+			Auctions.SerializeObject(Path.Combine(FilesPath, string.Format("data-{0}.dat", DateTime.Now.ToString("ddMMyyyyhhmmss"))));
+			try
+			{
+				Directory.GetFiles(FilesPath)
+					.Select(f => new FileInfo(f))
+					.Where(f => (DateTime.Now - f.LastWriteTime).TotalMinutes > 5)
+					.ToList()
+					.ForEach(f => f.Delete());
+			}
+			catch (Exception e) { }
 		}
 
 		public Updater()
@@ -46,24 +62,24 @@ namespace MadBidFetcher.Services
 
 		public void UpdateLoop(object state)
 		{
-			var sinceReset = 0;
-			try
+			DateTime? lastRefreshTime = null;
+			while (true)
 			{
-				while (true)
+				try
 				{
-					if (sinceReset > (int)state)
+					if (lastRefreshTime == null || (DateTime.Now - lastRefreshTime.Value).TotalSeconds > 30)
 					{
-						sinceReset = 0;
+						RefreshAll();
+						lastRefreshTime = DateTime.Now;
 						Save();
 					}
-					sinceReset++;
-					Update();
+					else
+						Update();
 					Thread.Sleep(2000);
 				}
-			}
-			finally
-			{
-				Save();
+				catch (Exception e)
+				{
+				}
 			}
 		}
 
@@ -84,30 +100,36 @@ namespace MadBidFetcher.Services
 								 {
 									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction { Id = a.auction_id });
 									 auction.Title = a.title;
-									 auction.Images = a.images.Select(i => string.Format("{0}/{1}", r.reference.image_base, i)).ToArray();
+									 auction.Images = a.images.Select(i => string.Format("{0}{2}/{3}/{4}/{1}.normal.jpg", r.reference.image_base, i, i[i.Length - 3], i[i.Length - 2], i[i.Length - 1])).ToArray();
 									 auction.Description = a.description + a.description_summary;
 									 auction.BidTimeOut = a.auction_data.timeout;
 									 auction.Price = a.auction_data.last_bid.highest_bid;
+									 auction.RetailPrice = a.rrp;
 									 auction.CreditCost = a.auction_data.credit_cost;
 									 auction.LastBidDate = a.auction_data.last_bid.Date;
-									 auction.Status = (AuctionStatus) (a.auction_data.state%100);
+									 auction.Status = (AuctionStatus)(a.auction_data.state % 100);
+									 auction.ActivePlayers = null;
+									 auction.StartTime = a.auction_data.availability.time_start;
+									 auction.EndTime = a.auction_data.availability.time_end;
+									 var bidsToCheck = auction.Bids.Count > 100
+														   ? auction.Bids.Skip(auction.Bids.Count - 20).Take(20).ToList()
+														   : auction.Bids;
 									 a.auction_data.bidding_history
 										 .OrderBy(b => b.bid_value)
 										 .ToList()
 										 .ForEach(b =>
 													  {
 														  var player = auction.Players.GetOrAdd(b.user_name, () => new Player { Name = b.user_name });
-														  var last = auction.Bids.LastOrDefault();
-														  if (last!=null && b.bid_value <= last.Value)
+														  if (bidsToCheck.Any(bid => Math.Abs(bid.Value - b.bid_value) < 0.001))
 															  return;
 														  var time = a.auction_data.last_bid.Date != null
-														             && Math.Abs(b.bid_value - a.auction_data.last_bid.highest_bid) < 0.001
-														             && b.user_name == a.auction_data.last_bid.highest_bidder
-															             ? a.auction_data.last_bid.Date
-															             : (DateTime?) null;
+																	 && Math.Abs(b.bid_value - a.auction_data.last_bid.highest_bid) < 0.001
+																	 && b.user_name == a.auction_data.last_bid.highest_bidder
+																		 ? a.auction_data.last_bid.Date
+																		 : (DateTime?)null;
 														  auction.Bids.Add(new Bid { Auction = auction, Player = player, Value = b.bid_value, Time = time });
 													  });
-
+									 auction.Bids = auction.Bids.OrderBy(a1 => a1.Value).ToList();
 								 });
 			}
 		}
@@ -131,14 +153,18 @@ namespace MadBidFetcher.Services
 									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction { Id = a.auction_id });
 									 auction.BidTimeOut = a.timeout;
 									 auction.Status = (AuctionStatus)(a.state % 100);
-									 auction.Price = a.highest_bid;
 									 DateTime date;
 									 if (!DateTime.TryParse(a.date_bid, out date) || auction.LastBidDate == date)
 										 return;
 									 auction.LastBidDate = date;
+									 auction.Price = a.highest_bid;
+									 auction.ActivePlayers = null;
 									 var player = auction.Players.GetOrAdd(a.highest_bidder, () => new Player { Name = a.highest_bidder });
-									 player.Count++;
-									 //player.Delta++;
+									 auction.Bids = auction.Bids ?? new List<Bid>();
+									 var lastBid = auction.Bids.LastOrDefault();
+									 if (lastBid != null && lastBid.Value - a.highest_bid > 0.001)
+										 return;
+									 auction.Bids.Add(new Bid { Auction = auction, Player = player, Time = date, Value = a.highest_bid });
 								 });
 			}
 

@@ -1,23 +1,45 @@
 ﻿@model MadBidFetcher.Model.AuctionModel
 
 @{
-    ViewBag.Title = "Auction Display";
-    var auctionTime = Model.Auction.BidTimeOut/2*1000;
+    ViewBag.Title = Model.Auction.Title;
+    var auctionTime = Math.Ceiling(Model.Auction.BidTimeOut / 2.0) * 1000;
 }
-@if(Model.AutoUpdate && auctionTime>0)
+<link href="@Url.Content("~/Content/Auction.css")" rel="stylesheet" />
+
+@if (auctionTime > 0)
 {
-	<script type="text/javascript">
-	    window.setInterval(function() { window.location.reload(); }, @auctionTime);
-	</script>
+    <script type="text/javascript">
+        window.setInterval(function() { window.location.reload(); }, @auctionTime);
+    </script>
 }
-<h2>Auction Display - @((int)(DateTime.Now-Model.Auction.LastDeltaReset).TotalSeconds) - @Model.Players.Count(r => r.Delta > 0)</h2>
-<table width="100%">
-    @foreach (var p in Model.Players)
-    {
-        <tr>
-            <td>@p.Name</td>
-            <td>@p.Count</td>
-            <td>@p.Delta</td>
-        </tr>
-    }
+<div>
+    @Html.ActionLink("Back", "Index")
+</div>
+<table class="auctionDetails">
+    <tr>
+        <td class="auctionCompact">@Html.Partial("ShowCompact", Model.Auction)</td>
+        <td>
+            @foreach (var p in Model.Auction.ActivePlayers)
+            {
+                <div class="players">
+                    <p>Last @p.Key bids</p>
+                    <table>
+                        @foreach (var player in p.Value.OrderByDescending(b=>b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
+                        {
+                            <tr>
+                                <td>
+                                    <b>@player.Player.Name</b>
+                                </td>
+                                <td>
+                                    @player.Bids.Count
+                                </td>
+                                <td class="bids">(@(string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray())))
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+       </td>
+    </tr>
 </table>
