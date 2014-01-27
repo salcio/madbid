@@ -1,4 +1,5 @@
-﻿@using MadBidFetcher.Model
+﻿@using MadBidFetcher
+@using MadBidFetcher.Model
 @model MadBidFetcher.Model.AuctionModel
 
 @{
@@ -20,34 +21,36 @@
     <tr>
         <td class="auctionCompact">@Html.Partial("ShowCompact", Model.Auction)</td>
         <td>
-            @foreach (var p in Model.Auction.ActivePlayers)
-            {
-                <div class="players">
-                    <p>Last @p.Key bids (@p.Value.Count)</p>
-                    <table>
-                        @foreach (var player in p.Value.OrderByDescending(b => b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
-                        {
-                            <tr>
-                                <td>
-                                    <b>@player.Player.Name</b>
-                                </td>
-                                <td class="bids">
-                                    @player.Bids.Count
-                                </td>
-                                <td class="bids">(@(string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray())))
-                                </td>
-                            </tr>
-                        }
-                    </table>
-                </div>
-            }
-            <div class="allPlayers">
+            <div class="playersWrapper">
+                @foreach (var p in Model.Auction.ActivePlayers)
+                {
+                    <div class="players">
+                        <p>Last @p.Key bids (@p.Value.Count)</p>
+                        <table>
+                            @foreach (var player in p.Value.OrderByDescending(b => b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
+                            {
+                                <tr>
+                                    <td>
+                                        <b>@player.Player.Name</b>
+                                    </td>
+                                    <td class="bids">
+                                        @player.Bids.Count
+                                    </td>
+                                    <td class="bids">(@(string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray())))
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="playersWrapper allPlayers">
                 <table>
                     @foreach (var p in Model.Auction.Players.OrderByDescending(pl => pl.Value.Bids.Count))
                     {
                         var last = p.Value.Bids.LastOrDefault();
                         <tr>
-                            <td>@p.Key</td>
+                            <td class="@(p.Key == SessionStore.CurrentUser?"current":"")">@p.Key</td>
                             <td>@p.Value.Bids.Count</td>
                             @if (last != null)
                             {
