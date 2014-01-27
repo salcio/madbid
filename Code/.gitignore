@@ -9,3 +9,4 @@ Debug/
 pkgobj/
 pkg/
 FakesAssemblies/
+data-*.dat
