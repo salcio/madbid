@@ -15,7 +15,7 @@
             </a>
         }
         <p>
-            @Model.Status @(Model.DateOpens.HasValue && Model.DateOpens > DateTime.Now ? Model.DateOpens.Value.ToString("dd MMM hh:mm") : string.Format("{0}-{1}", Model.StartTime, Model.EndTime))
+            @Model.Status @(Model.DateOpens.HasValue && Model.DateOpens > DateTime.Now ? Model.DateOpens.Value.ToString("dd MMM HH:mm") : string.Format("{0}-{1}", Model.StartTime, Model.EndTime))
         </p>
         <table width="100%">
             <tr>

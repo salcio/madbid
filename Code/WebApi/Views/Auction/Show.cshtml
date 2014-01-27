@@ -1,8 +1,9 @@
-﻿@model MadBidFetcher.Model.AuctionModel
+﻿@using MadBidFetcher.Model
+@model MadBidFetcher.Model.AuctionModel
 
 @{
     ViewBag.Title = Model.Auction.Title;
-    var auctionTime = Math.Ceiling(Model.Auction.BidTimeOut / 2.0) * 1000;
+    var auctionTime = Model.Auction.Status == AuctionStatus.Closed ? 0 : Math.Ceiling(Model.Auction.BidTimeOut / 2.0) * 1000;
 }
 <link href="@Url.Content("~/Content/Auction.css")" rel="stylesheet" />
 
@@ -42,7 +43,7 @@
             }
             <div class="allPlayers">
                 <table>
-                    @foreach (var p in Model.Auction.Players.OrderByDescending(pl=>pl.Value.Bids.Count))
+                    @foreach (var p in Model.Auction.Players.OrderByDescending(pl => pl.Value.Bids.Count))
                     {
                         var last = p.Value.Bids.LastOrDefault();
                         <tr>
