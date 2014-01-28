@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -43,7 +44,8 @@ namespace MadBidFetcher.Services
 			{
 				Directory.GetFiles(FilesPath)
 					.Select(f => new FileInfo(f))
-					.Where(f => (DateTime.Now - f.LastWriteTime).TotalMinutes > 5)
+					.OrderByDescending(f => f.LastWriteTime)
+					.Skip(3)
 					.ToList()
 					.ForEach(f => f.Delete());
 			}
@@ -63,18 +65,23 @@ namespace MadBidFetcher.Services
 		public void UpdateLoop(object state)
 		{
 			DateTime? lastRefreshTime = null;
+			DateTime? lastSaveTime = null;
 			while (true)
 			{
 				try
 				{
-					if (lastRefreshTime == null || (DateTime.Now - lastRefreshTime.Value).TotalSeconds > 30)
+					if (lastRefreshTime == null || (DateTime.Now - lastRefreshTime.Value).TotalSeconds > 20)
 					{
 						RefreshAll();
 						lastRefreshTime = DateTime.Now;
-						Save();
 					}
 					else
 						Update();
+					if (lastSaveTime == null || (DateTime.Now - lastSaveTime.Value).TotalSeconds > 120)
+					{
+						lastSaveTime = DateTime.Now;
+						Save();
+					}
 					Thread.Sleep(2000);
 				}
 				catch (Exception e)
@@ -100,7 +107,31 @@ namespace MadBidFetcher.Services
 								 {
 									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction { Id = a.auction_id });
 									 auction.Title = a.title;
-									 auction.Images = a.images.Select(i => string.Format("{0}{2}/{3}/{4}/{1}.normal.jpg", r.reference.image_base, i, i[i.Length - 3], i[i.Length - 2], i[i.Length - 1])).ToArray();
+									 if (auction.Images == null || auction.Images[0].StartsWith("http", true, CultureInfo.CurrentCulture))
+									 {
+										 var images = a.images
+											 .Select(
+												 i =>
+												 new Uri(string.Format("{0}{2}/{3}/{4}/{1}.normal.jpg", r.reference.image_base, i, i[i.Length - 3], i[i.Length - 2],
+															   i[i.Length - 1])))
+											 .ToList();
+
+										 var imagesfolder = Path.Combine(FilesPath, "images");
+										 if (!Directory.Exists(imagesfolder))
+										 {
+											 Directory.CreateDirectory(imagesfolder);
+										 }
+										 images
+											 .ForEach(i =>
+														  {
+															  var fileName = Path.Combine(FilesPath, "images", i.Segments.Last());
+															  if (File.Exists(fileName))
+																  return;
+															  client.DownloadFile(i, fileName);
+														  });
+
+										 auction.Images = images.Select(i => Path.Combine(FilesPath, "images", i.Segments.Last())).ToArray();
+									 }
 									 auction.Description = a.description + a.description_summary;
 									 auction.BidTimeOut = a.auction_data.timeout;
 									 auction.Price = a.auction_data.last_bid.highest_bid;

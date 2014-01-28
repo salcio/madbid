@@ -1,4 +1,5 @@
-﻿@model MadBidFetcher.Model.Auction
+﻿@using MadBidFetcher
+@model MadBidFetcher.Model.Auction
 
 @{
     ViewBag.Title = "Auction Display";
@@ -11,7 +12,7 @@
         @if (Model.Images != null)
         {
             <a href="@Url.Action("Show", new { id = Model.Id })">
-                <img src="@Model.Images[0]"/>
+                <img src="@(Model.Images[0].StartsWith("http") ? Model.Images[0] : Url.Action("Image", new { id = Model.Id, index = 0 }))"/>
             </a>
         }
         <p>
@@ -39,7 +40,7 @@
                 <td>Bid time 
                 </td>
                 <td>
-                    @Model.BidTimeOut
+                    @Model.BidTimeOut s
                 </td>
             </tr>
             <tr>
@@ -56,13 +57,21 @@
                     @Model.Players.Count
                 </td>
             </tr>
-            <tr>
-                <td>Is Current user auction    
-                </td>
-                <td>
-                    @Model.CurrentUserAuction
-                </td>
-            </tr>
+            @if (Model.CurrentUserAuction)
+            {
+                var userBids = Model.Players[SessionStore.CurrentUser].Bids;
+                <tr>
+                    <td>Credits spent</td>
+                    <td>@userBids.Count</td>
+                </tr>
+                if (userBids.Count > 0 && userBids.Last().Time.HasValue)
+                {
+                <tr>
+                    <td>Your Last bid</td>
+                    <td>@userBids.Last().Time.Value.ToString("dd MMM HH:mm")</td>
+                </tr>
+                }
+            }
         </table>
     </div>
 </div>

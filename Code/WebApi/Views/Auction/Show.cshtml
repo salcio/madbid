@@ -28,18 +28,37 @@
                         <p>Last @p.Key bids (@p.Value.Count)</p>
                         <table>
                             @foreach (var player in p.Value.OrderByDescending(b => b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
-                            {
+							{
                                 <tr>
                                     <td>
                                         <b>@player.Player.Name</b>
                                     </td>
                                     <td class="bids">
-                                        @player.Bids.Count
+                                        @if(p.Key == Auction.ActivaPlayersTimes[0])
+										{
+											var player1 = player;
+											var playerAllBids = Model.Auction.ActivePlayers
+                                                .Skip(1)
+												.Select(ap =>
+															{
+																var resultPlayer =ap.Value.FirstOrDefault(pb => pb.Player.Name == player1.Player.Name);
+																return resultPlayer == null ? 0 : resultPlayer.Bids.Count;
+															})
+                                                            .ToArray();
+											@(string.Format("{0} ({1}, {2})", player.Bids.Count,string.Join(", ",playerAllBids),Model.Auction.Players[player.Player.Name].Bids.Count))
+										}
+                                        else
+										{
+                                            @player.Bids.Count
+										}
                                     </td>
-                                    <td class="bids">(@(string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray())))
+                                    <td class="bids">
+                                        @(p.Key == Auction.ActivaPlayersTimes[0]
+											  ? player.Bids.OrderByDescending(b => b.Value).Select(b => b.Value.ToString("C")).FirstOrDefault()
+											  : string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray()))
                                     </td>
                                 </tr>
-                            }
+							}
                         </table>
                     </div>
                 }
@@ -50,7 +69,7 @@
                     {
                         var last = p.Value.Bids.LastOrDefault();
                         <tr>
-                            <td class="@(p.Key == SessionStore.CurrentUser?"current":"")">@p.Key</td>
+                            <td class="@(p.Key == SessionStore.CurrentUser ? "current" : "")">@p.Key</td>
                             <td>@p.Value.Bids.Count</td>
                             @if (last != null)
                             {
