@@ -34,6 +34,7 @@ namespace MadBidFetcher.Model
 			set { _bids = value; }
 		}
 
+		[XmlIgnore]
 		public Dictionary<int, List<PlayerBids>> ActivePlayers
 		{
 			get

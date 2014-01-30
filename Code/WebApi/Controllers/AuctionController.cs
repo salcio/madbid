@@ -15,7 +15,10 @@ namespace WebApi.Controllers
 		public ActionResult Index()
 		{
 			return View(Updater.Instance.Auctions.Values
-				.Where(a => a.Status != AuctionStatus.Closed || a.LastBidDate.HasValue && a.LastBidDate.Value.AddDays(1) > DateTime.Now)
+				.Where(a => 
+					a.Status != AuctionStatus.Closed 
+					|| a.LastBidDate.HasValue && a.LastBidDate.Value.AddDays(1) > DateTime.Now
+					&& (!a.Title.Contains("MadBid Credits") || a.LastBidDate.Value.AddHours(1) > DateTime.Now))
 				.OrderByDescending(a => a.Status == AuctionStatus.Running)
 				.ThenByDescending(a => a.CurrentUserAuction)
 				.ThenByDescending(a => a.Status)
