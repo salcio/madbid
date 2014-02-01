@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -58,6 +59,52 @@ namespace MadBidFetcher.Model
 		public bool CurrentUserAuction
 		{
 			get { return Players.ContainsKey(SessionStore.CurrentUser); }
+		}
+
+		public bool Pinned { get; set; }
+
+		public int ProductId { get; set; }
+
+		public int TimingsInterval
+		{
+			get { return _timingsInterval = _timingsInterval == 0 ? 5 : _timingsInterval; }
+			set { _timingsInterval = value; }
+		}
+
+		[NonSerialized]
+		private List<BidStatistics> _timngs;
+
+		private int _timingsInterval = 5;
+
+		[XmlIgnore]
+		public List<BidStatistics> Timings
+		{
+			get
+			{
+				if (_timngs != null)
+					return _timngs;
+				var startTime = GetStartDate();
+				return _timngs = Bids
+					.Where(t => t.Time != null)
+					.GroupBy(g => (int)((g.Time.Value - startTime.Value).TotalMinutes / TimingsInterval))
+					.Select(g => new BidStatistics() { Time = g.Key, Count = g.Count(), Players = g.Select(b => b.Player).Distinct().Count() })
+					.ToList();
+			}
+		}
+
+		public DateTime? GetStartDate()
+		{
+			var startTime = DateOpens;
+			if (startTime == null)
+			{
+				var first = Bids.FirstOrDefault(b => b.Time != null);
+				if (first == null)
+				{
+					return startTime;
+				}
+				startTime = first.Time.Value;
+			}
+			return startTime;
 		}
 
 		public Auction()

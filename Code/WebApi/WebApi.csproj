@@ -124,6 +124,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AuctionController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -191,6 +192,40 @@
     <Content Include="Global.asax" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
+    <Content Include="Scripts\Highcharts\adapters\mootools-adapter.js" />
+    <Content Include="Scripts\Highcharts\adapters\mootools-adapter.src.js" />
+    <Content Include="Scripts\Highcharts\adapters\prototype-adapter.js" />
+    <Content Include="Scripts\Highcharts\adapters\prototype-adapter.src.js" />
+    <Content Include="Scripts\Highcharts\adapters\standalone-framework.js" />
+    <Content Include="Scripts\Highcharts\adapters\standalone-framework.src.js" />
+    <Content Include="Scripts\Highcharts\highcharts-all.js" />
+    <Content Include="Scripts\Highcharts\highcharts-more.js" />
+    <Content Include="Scripts\Highcharts\highcharts-more.src.js" />
+    <Content Include="Scripts\Highcharts\highcharts.js" />
+    <Content Include="Scripts\Highcharts\highcharts.src.js" />
+    <Content Include="Scripts\Highcharts\modules\annotations.js" />
+    <Content Include="Scripts\Highcharts\modules\annotations.src.js" />
+    <Content Include="Scripts\Highcharts\modules\canvas-tools.js" />
+    <Content Include="Scripts\Highcharts\modules\canvas-tools.src.js" />
+    <Content Include="Scripts\Highcharts\modules\data.js" />
+    <Content Include="Scripts\Highcharts\modules\data.src.js" />
+    <Content Include="Scripts\Highcharts\modules\drilldown.js" />
+    <Content Include="Scripts\Highcharts\modules\drilldown.src.js" />
+    <Content Include="Scripts\Highcharts\modules\exporting.js" />
+    <Content Include="Scripts\Highcharts\modules\exporting.src.js" />
+    <Content Include="Scripts\Highcharts\modules\funnel.js" />
+    <Content Include="Scripts\Highcharts\modules\funnel.src.js" />
+    <Content Include="Scripts\Highcharts\modules\heatmap.js" />
+    <Content Include="Scripts\Highcharts\modules\heatmap.src.js" />
+    <Content Include="Scripts\Highcharts\modules\map.js" />
+    <Content Include="Scripts\Highcharts\modules\map.src.js" />
+    <Content Include="Scripts\Highcharts\modules\no-data-to-display.js" />
+    <Content Include="Scripts\Highcharts\modules\no-data-to-display.src.js" />
+    <Content Include="Scripts\Highcharts\themes\dark-blue.js" />
+    <Content Include="Scripts\Highcharts\themes\dark-green.js" />
+    <Content Include="Scripts\Highcharts\themes\gray.js" />
+    <Content Include="Scripts\Highcharts\themes\grid.js" />
+    <Content Include="Scripts\Highcharts\themes\skies.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery-1.7.1.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -235,6 +270,7 @@
     <Content Include="Views\Auction\Show.cshtml" />
     <Content Include="Views\Auction\Index.cshtml" />
     <Content Include="Views\Auction\ShowCompact.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\Player.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

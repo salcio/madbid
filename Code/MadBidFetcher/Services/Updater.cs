@@ -16,22 +16,34 @@ namespace MadBidFetcher.Services
 	public class Updater
 	{
 		public Dictionary<int, Auction> Auctions { get; protected set; }
+		public HashSet<string> Players { get; protected set; }
 		public string FilesPath { get; set; }
 		public static Updater Instance { get; private set; }
 
 		public static Updater Initialize(string auctionsPath)
 		{
 			var files = Directory.Exists(auctionsPath)
-							? Directory.GetFiles(auctionsPath).OrderByDescending(f => new FileInfo(f).LastWriteTime).ToArray()
-							: new string[0];
+				            ? Directory.GetFiles(auctionsPath)
+					              .Select(f => new FileInfo(f))
+					              .Where(f => f.Name.StartsWith("data-"))
+					              .OrderByDescending(f => f.LastWriteTime)
+					              .Select(f => f.FullName)
+					              .ToArray()
+				            : new string[0];
 			if (files.Length > 0)
 			{
 				var auctions = ObjectExtensions.DeSerializeObject<Dictionary<int, Auction>>(files[0]);
+				var players = new HashSet<string>();
 				auctions.Values.ToList().ForEach(a =>
-					                                 {
-						                                 a.Bids = a.Bids.Distinct().ToList();
-						                                 a.Players.Values.ToList().ForEach(p => p.Bids = p.Bids.Distinct().ToList());
-					                                 });
+													 {
+														 a.Bids = a.Bids.Distinct().OrderBy(v => v.Value).ToList();
+														 a.Players.Values.ToList().ForEach(p =>
+																							   {
+																								   p.Bids = p.Bids.Distinct().OrderBy(v => v.Value).ToList();
+																								   if (!players.Contains(p.Name))
+																									   players.Add(p.Name);
+																							   });
+													 });
 				return Instance = new Updater
 						   {
 							   Auctions = auctions,
@@ -64,6 +76,7 @@ namespace MadBidFetcher.Services
 		public Updater()
 		{
 			Auctions = new Dictionary<int, Auction>();
+			Players = new HashSet<string>();
 		}
 
 		public void UpdateAsyncLoop(int saveAndResetEveryNUpdates)
@@ -101,6 +114,16 @@ namespace MadBidFetcher.Services
 
 		public virtual void RefreshAll()
 		{
+			Refresh("http://uk.madbid.com/json/site/load/current/refresh/");
+		}
+
+		public virtual void Refresh(int auctionId)
+		{
+			Refresh(string.Format("http://uk.madbid.com/json/site/load/auction/{0}/extend/refresh/", auctionId));
+		}
+
+		public virtual void Refresh(string url)
+		{
 			var serializer = new JavaScriptSerializer();
 			using (var client = new WebClient())
 			{
@@ -108,7 +131,7 @@ namespace MadBidFetcher.Services
 				client.Headers.Add(HttpRequestHeader.UserAgent,
 								   "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
 				var r = serializer
-					.Deserialize<Results<RefreshResponse>>(client.DownloadString("http://uk.madbid.com/json/site/load/current/refresh/"))
+					.Deserialize<Results<RefreshResponse>>(client.DownloadString(url))
 					.Response;
 
 				r.items.ToList()
@@ -152,6 +175,7 @@ namespace MadBidFetcher.Services
 									 auction.DateOpens = a.auction_data.date_opens;
 									 auction.StartTime = a.auction_data.availability.time_start;
 									 auction.EndTime = a.auction_data.availability.time_end;
+									 auction.ProductId = a.product_id;
 									 a.auction_data.bidding_history
 										 .OrderBy(b => b.bid_value)
 										 .ToList()
@@ -207,21 +231,24 @@ namespace MadBidFetcher.Services
 
 		private static void InsertBid(List<Bid> bids, Bid newBid)
 		{
-			var index = bids.Count - 20;
-			if (bids.Count > 0)
+			lock (bids)
 			{
-				for (index = index < 0 ? 0 : index; index < bids.Count; index++)
+				var index = bids.Count - 20;
+				if (bids.Count > 0)
 				{
-					if (bids[index].Equals(newBid))
-						return;
-					if (bids[index].Value > newBid.Value)
-						break;
+					for (index = index < 0 ? 0 : index; index < bids.Count; index++)
+					{
+						if (bids[index].Equals(newBid))
+							return;
+						if (bids[index].Value > newBid.Value)
+							break;
+					}
 				}
+				if (index >= bids.Count || index < 0)
+					bids.Add(newBid);
+				else
+					bids.Insert(index, newBid);
 			}
-			if (index < bids.Count)
-				bids.Add(newBid);
-			else
-				bids.Insert(index, newBid);
 		}
 	}
 }

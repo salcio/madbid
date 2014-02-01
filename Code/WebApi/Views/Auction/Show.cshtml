@@ -5,21 +5,103 @@
 @{
     ViewBag.Title = Model.Auction.Title;
     var auctionTime = Model.Auction.Status == AuctionStatus.Closed ? 0 : Math.Ceiling(Model.Auction.BidTimeOut / 2.0) * 1000;
+    var startDate = Model.Auction.GetStartDate();
 }
 <link href="@Url.Content("~/Content/Auction.css")" rel="stylesheet" />
 
-@if (auctionTime > 0)
+@section scripts
 {
+    <script src="~/Scripts/Highcharts/highcharts.js"></script>
+    <script src="~/Scripts/Highcharts/modules/exporting.js"></script>
+
     <script type="text/javascript">
-        window.setInterval(function() { window.location.reload(); }, @auctionTime);
+        $(function () {
+            var options = {
+                chart: {
+                    zoomType: 'x',
+                    spacingRight: 20
+                },
+                title: {
+                    text: 'Players'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    maxZoom:@(Model.Auction.TimingsInterval*10*60000),
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: null
+                    }
+                },
+                tooltip: {
+                    shared: true
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        lineWidth: 1,
+                        marker: {
+                            enabled: false
+                        },
+                        shadow: false,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    }
+                }
+            };
+            $('#chartContainerPlayers').highcharts($.extend(options,{
+                series: [{
+                    type: 'area',
+                    name: 'Players',
+                    pointInterval:@(Model.Auction.TimingsInterval *60000),
+                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day),
+                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Players).ToArray())]
+                }]}));
+            $('#chartContainerBids').highcharts($.extend(options,{
+                title: {
+                    text: 'Bids'
+                },
+                series: [{
+                    type: 'area',
+                    name: 'Bids',
+                    pointInterval: @(Model.Auction.TimingsInterval *60000),
+                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day),
+                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Count).ToArray())]
+                }]}));
+        });
     </script>
 }
+
+@*@if (auctionTime > 0)
+{
+    <script type="text/javascript">
+        window.setInterval(function() { window.location.reload(); }, @(auctionTime > 10000 ? 10000 : auctionTime));
+    </script>
+}*@
 <div>
     @Html.ActionLink("Back", "Index")
 </div>
 <table class="auctionDetails">
     <tr>
-        <td class="auctionCompact">@Html.Partial("ShowCompact", Model.Auction)</td>
+        <td class="auctionCompact">
+            @Html.Partial("ShowCompact", Model.Auction)
+        </td>
         <td>
             <div class="playersWrapper">
                 @foreach (var p in Model.Auction.ActivePlayers)
@@ -28,37 +110,37 @@
                         <p>Last @p.Key bids (@p.Value.Count)</p>
                         <table>
                             @foreach (var player in p.Value.OrderByDescending(b => b.Bids.Count).ThenByDescending(b => b.Bids.Max(b1 => b1.Value)))
-							{
+                            {
                                 <tr>
                                     <td>
-                                        <b>@player.Player.Name</b>
+                                        <b>@Html.DisplayFor(m => player.Player)</b>
                                     </td>
                                     <td class="bids">
-                                        @if(p.Key == Auction.ActivaPlayersTimes[0])
-										{
-											var player1 = player;
-											var playerAllBids = Model.Auction.ActivePlayers
+                                        @if (p.Key == Auction.ActivaPlayersTimes[0])
+                                        {
+                                            var player1 = player;
+                                            var playerAllBids = Model.Auction.ActivePlayers
                                                 .Skip(1)
-												.Select(ap =>
-															{
-																var resultPlayer =ap.Value.FirstOrDefault(pb => pb.Player.Name == player1.Player.Name);
-																return resultPlayer == null ? 0 : resultPlayer.Bids.Count;
-															})
+                                                .Select(ap =>
+                                                            {
+                                                                var resultPlayer = ap.Value.FirstOrDefault(pb => pb.Player.Name == player1.Player.Name);
+                                                                return resultPlayer == null ? 0 : resultPlayer.Bids.Count;
+                                                            })
                                                             .ToArray();
-											@(string.Format("{0} ({1}, {2})", player.Bids.Count,string.Join(", ",playerAllBids),Model.Auction.Players[player.Player.Name].Bids.Count))
-										}
+                                            @(string.Format("{0} ({1}, {2})", player.Bids.Count, string.Join(", ", playerAllBids), Model.Auction.Players[player.Player.Name].Bids.Count))
+                                        }
                                         else
-										{
+                                        {
                                             @player.Bids.Count
-										}
+                                        }
                                     </td>
                                     <td class="bids">
                                         @(p.Key == Auction.ActivaPlayersTimes[0]
-											  ? player.Bids.OrderByDescending(b => b.Value).Select(b => b.Value.ToString("C")).FirstOrDefault()
-											  : string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray()))
+                                              ? player.Bids.OrderByDescending(b => b.Value).Select(b => b.Value.ToString("C")).FirstOrDefault()
+                                              : string.Join(", ", player.Bids.OrderByDescending(b => b.Value).Take(5).Select(b => b.Value.ToString("C")).ToArray()))
                                     </td>
                                 </tr>
-							}
+                            }
                         </table>
                     </div>
                 }
@@ -69,7 +151,7 @@
                     {
                         var last = p.Value.Bids.LastOrDefault();
                         <tr>
-                            <td class="@(p.Key == SessionStore.CurrentUser ? "current" : "")">@p.Key</td>
+                            <td class="@(p.Key == SessionStore.CurrentUser ? "current" : "")">@Html.DisplayFor(m => p.Value)</td>
                             <td>@p.Value.Bids.Count</td>
                             @if (last != null)
                             {
@@ -82,6 +164,10 @@
                         </tr>
                     }
                 </table>
+            </div>
+            <div class="playersWrapper allPlayers chart" id="chartContainerPlayers">
+            </div>
+            <div class="playersWrapper allPlayers chart" id="chartContainerBids">
             </div>
         </td>
     </tr>

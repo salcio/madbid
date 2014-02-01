@@ -48,6 +48,7 @@
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Model\Auction.cs" />
     <Compile Include="Model\Bid.cs" />
+    <Compile Include="Model\BidStatistics.cs" />
     <Compile Include="Model\MadBitl\AuctionBid.cs" />
     <Compile Include="Model\MadBitl\AuctionData.cs" />
     <Compile Include="Model\MadBitl\AuctionLastBid.cs" />

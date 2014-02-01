@@ -1,4 +1,5 @@
 ﻿@using MadBidFetcher
+@using MadBidFetcher.Model
 @model MadBidFetcher.Model.Auction
 
 @{
@@ -7,7 +8,13 @@
 }
 <div class="auction">
     <div class="content">
-        <h5>@Html.ActionLink(string.IsNullOrEmpty(Model.Title) ? Model.Id.ToString() : Model.Title, "Show", new { id = Model.Id })</h5>
+        <h5>@Html.ActionLink(string.IsNullOrEmpty(Model.Title) ? Model.Id.ToString() : Model.Title, "Show", new { id = Model.Id })
+            ( 
+            <a href="@Url.Action("TogglePin", new { id = Model.Id })" title="@(Model.Pinned ? "Unpin" : "Pin")">@(Model.Pinned ? "U" : "P") </a>
+            <a href="@Url.Action("Refresh", new { id = Model.Id })" title="Refresh">R </a>
+            <a href="@Url.Action("Similar", new { id = Model.Id })" title="Similar">S </a>
+            )
+        </h5>
         <p class="prices"><a href="http://uk.madbid.com/show/auction/@Model.Id/hehe">@Model.Price.ToString("C") - @Model.RetailPrice.ToString("C") </a></p>
         @if (Model.Images != null)
         {
@@ -16,7 +23,16 @@
             </a>
         }
         <p>
-            @Model.Status @(Model.DateOpens.HasValue && Model.DateOpens > DateTime.Now ? Model.DateOpens.Value.ToString("dd MMM HH:mm") : string.Format("{0}-{1}", Model.StartTime, Model.EndTime))
+            @if (Model.Status == AuctionStatus.Closed)
+            {
+				@Model.Status
+				<br/>
+                @Html.DisplayFor(m=>m.Bids.Last().Player) @(Model.LastBidDate.HasValue ? Model.LastBidDate.Value.ToString(" dd MMM HH:mm") : "")
+            }
+            else
+            {
+                @Model.Status @(" ") @(Model.DateOpens.HasValue && Model.DateOpens > DateTime.Now ? Model.DateOpens.Value.ToString("dd MMM HH:mm") : string.Format("{0}-{1}", Model.StartTime, Model.EndTime))
+            }
         </p>
         <table width="100%">
             <tr>

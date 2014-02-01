@@ -15,16 +15,18 @@ namespace WebApi.Controllers
 		public ActionResult Index()
 		{
 			return View(Updater.Instance.Auctions.Values
-				.Where(a => 
-					a.Status != AuctionStatus.Closed 
+				.Where(a =>
+					a.Status != AuctionStatus.Closed
 					|| a.LastBidDate.HasValue && a.LastBidDate.Value.AddDays(1) > DateTime.Now
 					&& (!a.Title.Contains("MadBid Credits") || a.LastBidDate.Value.AddHours(1) > DateTime.Now))
 				.OrderByDescending(a => a.Status == AuctionStatus.Running)
+				.ThenByDescending(a => a.Pinned)
 				.ThenByDescending(a => a.CurrentUserAuction)
 				.ThenByDescending(a => a.Status)
 				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[0]].Count)
 				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[1]].Count)
 				.ThenBy(a => a.BidTimeOut)
+				.ThenBy(a => a.Title.Contains("MadBid Credits"))
 				.ToList());
 		}
 
@@ -39,12 +41,33 @@ namespace WebApi.Controllers
 		{
 			Auction auction;
 			if (!Updater.Instance.Auctions.TryGetValue(id, out auction))
-				return Index();
+				return RedirectToAction("Index");
 			var model = new AuctionModel
 			{
 				Auction = auction,
 			};
 			return View(model);
+		}
+
+		public ActionResult Similar(int id)
+		{
+			Auction auction;
+			if (!Updater.Instance.Auctions.TryGetValue(id, out auction))
+				return RedirectToAction("Index");
+
+			return View("Index", Updater.Instance.Auctions
+				.Values
+				.Where(a => a.ProductId == auction.ProductId)
+				.OrderByDescending(a=>a.Id==id)
+				.ThenByDescending(a => a.Status == AuctionStatus.Running)
+				.ThenByDescending(a => a.Pinned)
+				.ThenByDescending(a => a.CurrentUserAuction)
+				.ThenByDescending(a => a.Status)
+				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[0]].Count)
+				//.ThenByDescending(a => a.ActivePlayers[Auction.ActivaPlayersTimes[1]].Count)
+				.ThenBy(a => a.BidTimeOut)
+				.ThenBy(a => a.Title.Contains("MadBid Credits"))
+				.ToList());
 		}
 
 		public ActionResult Image(int id, int index)
@@ -74,6 +97,38 @@ namespace WebApi.Controllers
 			Response.Cache.SetMaxAge(new TimeSpan(2, 2, 2, 2));
 			Response.Cache.SetSlidingExpiration(true);
 			return File(auction.Images[index], "image/jpg", null);
+		}
+
+		public ActionResult TogglePin(int id)
+		{
+			Auction auction;
+			if (Updater.Instance.Auctions.TryGetValue(id, out auction))
+			{
+				auction.Pinned = !auction.Pinned;
+			}
+			return Redirect(Request.UrlReferrer.AbsoluteUri);
+		}
+
+		public ActionResult RefreshAll()
+		{
+			lock (Updater.Instance.Auctions)
+			{
+				foreach (var value in Updater.Instance.Auctions.Values)
+				{
+					Updater.Instance.Refresh(value.Id);
+				}
+				return Redirect(Request.UrlReferrer.AbsoluteUri);
+			}
+		}
+
+		public ActionResult Refresh(int id)
+		{
+			Auction auction;
+			if (Updater.Instance.Auctions.TryGetValue(id, out auction))
+			{
+				Updater.Instance.Refresh(id);
+			}
+			return Redirect(Request.UrlReferrer.AbsoluteUri);
 		}
 	}
 }
