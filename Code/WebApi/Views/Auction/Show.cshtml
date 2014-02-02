@@ -26,7 +26,7 @@
                 },
                 xAxis: {
                     type: 'datetime',
-                    maxZoom:@(Model.Auction.TimingsInterval*10*60000),
+                    maxZoom:@(Model.Auction.TimingsInterval * 10 * 60000),
                     title: {
                         text: null
                     }
@@ -69,9 +69,9 @@
                 series: [{
                     type: 'area',
                     name: 'Players',
-                    pointInterval:@(Model.Auction.TimingsInterval *60000),
-                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day),
-                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Players).ToArray())]
+                    pointInterval:@(Model.Auction.TimingsInterval * 60000),
+                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day, @startDate.Value.Hour,@startDate.Value.Minute),
+                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Players == -1 ? "null" : t.Players.ToString()).ToArray())]
                 }]}));
             $('#chartContainerBids').highcharts($.extend(options,{
                 title: {
@@ -80,9 +80,9 @@
                 series: [{
                     type: 'area',
                     name: 'Bids',
-                    pointInterval: @(Model.Auction.TimingsInterval *60000),
-                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day),
-                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Count).ToArray())]
+                    pointInterval: @(Model.Auction.TimingsInterval * 60000),
+                    pointStart: Date.UTC(@startDate.Value.Year, @startDate.Value.Month-1, @startDate.Value.Day, @startDate.Value.Hour,@startDate.Value.Minute),
+                    data: [@string.Join(",", Model.Auction.Timings.Select(t => t.Count == -1 ? "null" : t.Count.ToString()).ToArray())]
                 }]}));
         });
     </script>
