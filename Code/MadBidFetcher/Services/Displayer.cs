@@ -10,7 +10,7 @@ namespace MadBidFetcher.Services
 		public void Display(Updater updater, int auctionId, int skipCountLessThen,Action<object> a)
 		{
 			var results = updater.Auctions
-			.GetOrAdd(auctionId, () => new Auction())
+			.GetOrAdd(auctionId, () => new Model.Auction())
 			.Players
 			.Values
 			.OrderByDescending(g => g.IsHighPlayer())

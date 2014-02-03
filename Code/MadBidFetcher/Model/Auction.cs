@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,14 +99,14 @@ namespace MadBidFetcher.Model
                     .Select(
                         g =>
                         new BidStatistics()
-                            {
-                                Time = g.Key,
-                                Count = g.Count(),
-                                Players = g.Select(b => b.Player).Distinct().Count()
-                            })
+                        {
+                            Time = g.Key,
+                            Count = g.Count(),
+                            Players = g.Select(b => b.Player).Distinct().Count()
+                        })
                     .OrderBy(s => s.Time)
                     .ToList();
-                if (_timngs == null)
+                if (_timngs == null || toSkip < 0)
                     _timngs = times;
                 else
                 {
@@ -123,6 +123,14 @@ namespace MadBidFetcher.Model
                 }
                 for (var i = _lastTimingsTime < 3 ? 0 : _lastTimingsTime - 2; i < maxTime; i++)
                 {
+                    if (_timngs.Count <= i)
+                    {
+                        Enumerable.Range(0, i - _timngs.Count + 1)
+                                  .ToList()
+                                  .ForEach(
+                                      index =>
+                                      _timngs.Add(new BidStatistics { Time = i - index, Count = -1, Players = -1 }));
+                    }
                     if (_timngs[i].Time != i)
                     {
                         _timngs.Insert(i, new BidStatistics { Time = i, Count = -1, Players = -1 });

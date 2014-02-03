@@ -15,7 +15,7 @@ namespace MadBidFetcher.Services
 {
 	public class Updater
 	{
-		public Dictionary<int, Auction> Auctions { get; protected set; }
+		public Dictionary<int, Model.Auction> Auctions { get; protected set; }
 		public HashSet<string> Players { get; protected set; }
 		public string FilesPath { get; set; }
 		public static Updater Instance { get; private set; }
@@ -32,7 +32,7 @@ namespace MadBidFetcher.Services
 				            : new string[0];
 			if (files.Length > 0)
 			{
-				var auctions = ObjectExtensions.DeSerializeObject<Dictionary<int, Auction>>(files[0]);
+				var auctions = ObjectExtensions.DeSerializeObject<Dictionary<int, Model.Auction>>(files[0]);
 				var players = new HashSet<string>();
 				auctions.Values.ToList().ForEach(a =>
 													 {
@@ -75,7 +75,7 @@ namespace MadBidFetcher.Services
 
 		public Updater()
 		{
-			Auctions = new Dictionary<int, Auction>();
+			Auctions = new Dictionary<int, Model.Auction>();
 			Players = new HashSet<string>();
 		}
 
@@ -137,7 +137,7 @@ namespace MadBidFetcher.Services
 				r.items.ToList()
 					.ForEach(a =>
 								 {
-									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction { Id = a.auction_id });
+									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Model.Auction { Id = a.auction_id });
 									 auction.Title = a.title;
 									 if (auction.Images == null || auction.Images[0].StartsWith("http", true, CultureInfo.CurrentCulture))
 									 {
@@ -181,13 +181,13 @@ namespace MadBidFetcher.Services
 										 .ToList()
 										 .ForEach(b =>
 													  {
-														  var player = auction.Players.GetOrAdd(b.user_name, () => new Player { Name = b.user_name });
+														  var player = auction.Players.GetOrAdd(b.user_name, () => new Model.Player { Name = b.user_name });
 														  var time = a.auction_data.last_bid.Date != null
 																	 && Math.Abs(b.bid_value - a.auction_data.last_bid.highest_bid) < 0.001
 																	 && b.user_name == a.auction_data.last_bid.highest_bidder
 																		 ? a.auction_data.last_bid.Date
 																		 : (DateTime?)null;
-														  var newbid = new Bid { Auction = auction, Player = player, Value = b.bid_value, Time = time };
+														  var newbid = new Model.Bid { Auction = auction, Player = player, Value = b.bid_value, Time = time };
 														  InsertBid(auction.Bids, newbid);
 														  InsertBid(player.Bids, newbid);
 													  });
@@ -211,7 +211,7 @@ namespace MadBidFetcher.Services
 					.ToList()
 					.ForEach(a =>
 								 {
-									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Auction { Id = a.auction_id });
+									 var auction = Auctions.GetOrAdd(a.auction_id, () => new Model.Auction { Id = a.auction_id });
 									 auction.BidTimeOut = a.timeout;
 									 auction.Status = (AuctionStatus)(a.state % 100);
 									 DateTime date;
@@ -220,8 +220,8 @@ namespace MadBidFetcher.Services
 									 auction.LastBidDate = date;
 									 auction.Price = a.highest_bid;
 									 auction.ActivePlayers = null;
-									 var player = auction.Players.GetOrAdd(a.highest_bidder, () => new Player { Name = a.highest_bidder });
-									 var newBid = new Bid { Auction = auction, Player = player, Time = date, Value = a.highest_bid };
+									 var player = auction.Players.GetOrAdd(a.highest_bidder, () => new Model.Player { Name = a.highest_bidder });
+									 var newBid = new Model.Bid { Auction = auction, Player = player, Time = date, Value = a.highest_bid };
 									 InsertBid(auction.Bids, newBid);
 									 InsertBid(player.Bids, newBid);
 								 });
@@ -229,7 +229,7 @@ namespace MadBidFetcher.Services
 
 		}
 
-		private static void InsertBid(List<Bid> bids, Bid newBid)
+		private static void InsertBid(List<Model.Bid> bids, Model.Bid newBid)
 		{
 			lock (bids)
 			{

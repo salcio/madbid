@@ -88,12 +88,12 @@
     </script>
 }
 
-@*@if (auctionTime > 0)
+@if (auctionTime > 0)
 {
     <script type="text/javascript">
         window.setInterval(function() { window.location.reload(); }, @(auctionTime > 10000 ? 10000 : auctionTime));
     </script>
-}*@
+}
 <div>
     @Html.ActionLink("Back", "Index")
 </div>

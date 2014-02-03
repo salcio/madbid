@@ -5,7 +5,14 @@ namespace MadBidFetcher.Model
 	[Serializable]
 	public class Bid
 	{
-		protected bool Equals(Bid other)
+        public int Id { get; set; }
+        public float Value { get; set; }
+        public DateTime? Time { get; set; }
+
+        public virtual Auction Auction { get; set; }
+        public virtual Player Player { get; set; }
+        
+        protected bool Equals(Bid other)
 		{
 			return Value.Equals(other.Value);
 		}
@@ -22,10 +29,5 @@ namespace MadBidFetcher.Model
 		{
 			return Value.GetHashCode();
 		}
-
-		public Auction Auction { get; set; }
-		public Player Player { get; set; }
-		public float Value { get; set; }
-		public DateTime? Time { get; set; }
-	}
+    }
 }

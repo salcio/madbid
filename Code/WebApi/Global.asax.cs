@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Hosting;
@@ -7,6 +8,8 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using MadBidFetcher;
+using MadBidFetcher.Migrations;
 using MadBidFetcher.Services;
 
 namespace WebApi
@@ -25,9 +28,10 @@ namespace WebApi
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-			var updater = Updater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\");
-			updater.UpdateAsyncLoop(30);
-
-		}
+			//var updater = Updater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\");
+			//updater.UpdateAsyncLoop(30);
+            Database.SetInitializer(new MadBidContextInitializer());
+            //Database.Initialize(false);
+        }
 	}
 }
