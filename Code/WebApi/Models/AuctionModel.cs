@@ -4,6 +4,6 @@ namespace MadBidFetcher.Model
 {
 	public class AuctionModel
 	{
-		public Auction Auction { get; set; }
+		public MadBidFetcher.Auction Auction { get; set; }
 	}
 }

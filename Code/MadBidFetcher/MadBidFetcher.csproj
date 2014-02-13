@@ -81,6 +81,8 @@
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\PlayerBids.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayerBids.cs" />
+    <Compile Include="Services\DbUpdater.cs" />
     <Compile Include="SessionStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\MadBitl\UpdateResponse.cs" />

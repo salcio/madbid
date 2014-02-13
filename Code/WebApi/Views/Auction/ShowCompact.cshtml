@@ -1,6 +1,6 @@
 ﻿@using MadBidFetcher
 @using MadBidFetcher.Model
-@model MadBidFetcher.Model.Auction
+@model MadBidFetcher.Auction
 
 @{
     ViewBag.Title = "Auction Display";
@@ -75,7 +75,7 @@
             </tr>
             @if (Model.CurrentUserAuction)
             {
-                var userBids = Model.Players[SessionStore.CurrentUser].Bids;
+                var userBids = Model.Bids.Where(p => p.PlayerName == SessionStore.CurrentUser).ToList();
                 <tr>
                     <td>Credits spent</td>
                     <td>@userBids.Count</td>

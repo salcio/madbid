@@ -1,6 +1,7 @@
 ﻿@using MadBidFetcher
 @using MadBidFetcher.Model
-@model MadBidFetcher.Model.AuctionModel
+@using Auction = MadBidFetcher.Auction
+@model AuctionModel
 
 @{
     ViewBag.Title = Model.Auction.Title;
@@ -127,7 +128,7 @@
                                                                 return resultPlayer == null ? 0 : resultPlayer.Bids.Count;
                                                             })
                                                             .ToArray();
-                                            @(string.Format("{0} ({1}, {2})", player.Bids.Count, string.Join(", ", playerAllBids), Model.Auction.Players[player.Player.Name].Bids.Count))
+                                            @(string.Format("{0} ({1}, {2})", player.Bids.Count, string.Join(", ", playerAllBids), Model.Auction.Bids.Count(b=>b.PlayerName==player.Player.Name)))
                                         }
                                         else
                                         {
@@ -147,12 +148,12 @@
             </div>
             <div class="playersWrapper allPlayers">
                 <table>
-                    @foreach (var p in Model.Auction.Players.OrderByDescending(pl => pl.Value.Bids.Count))
+                    @foreach (var p in Model.Auction.Players.OrderByDescending(pl => pl.Bids.Count))
                     {
-                        var last = p.Value.Bids.LastOrDefault();
+                        var last = p.Bids.LastOrDefault();
                         <tr>
-                            <td class="@(p.Key == SessionStore.CurrentUser ? "current" : "")">@Html.DisplayFor(m => p.Value)</td>
-                            <td>@p.Value.Bids.Count</td>
+                            <td class="@(p.Name == SessionStore.CurrentUser ? "current" : "")">@Html.DisplayFor(m => p)</td>
+                            <td>@p.Bids.Count</td>
                             @if (last != null)
                             {
                                 <td class="bids">@last.Value.ToString("C") (@last.Time)</td>

@@ -28,9 +28,9 @@ namespace WebApi
 			RouteConfig.RegisterRoutes(RouteTable.Routes);
 			BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-			//var updater = Updater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\");
-			//updater.UpdateAsyncLoop(30);
-            Database.SetInitializer(new MadBidContextInitializer());
+			Database.SetInitializer(new MadBidContextInitializer());
+		//	var updater = DbUpdater.Initialize(HostingEnvironment.ApplicationPhysicalPath + "App_Data\\");
+			//updater.UpdateAsyncLoop();
             //Database.Initialize(false);
         }
 	}
